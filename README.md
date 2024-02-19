@@ -1,6 +1,6 @@
 # Valuation Engine
 
-This repository is the data modelling part of the https://dashboard-finance-metrics.vercel.app/. It focuses on extracting financial data from the open-source SEC Financial Statement Data Sets, transforming data into data models with dynamic data pipelines, analyzing and calculating key financial metrics, and loading the processed data into a cloud database. The data is then used in another project to create an interactive website platform for data visualization.
+This repository is the data modelling part of the https://dashboard-finance-metrics.vercel.app/. It focuses on extracting financial data from the open-source SEC Financial Statement Data Sets, transforming data into data models with dynamic data pipelines, analyzing and calculating key financial metrics, and loading the processed data into a cloud database. The data is then used in another repository to create an interactive website platform for data visualization.
 
 ## Features
 - Data Extraction: Utilizes Python scripts to efficiently extract financial data from SEC Financial Statement Data Sets.
