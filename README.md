@@ -12,5 +12,10 @@ This repository is the data modelling part of the https://dashboard-finance-metr
 - Python for ETL processes and data analytics
 - Cloud MYSQL database for data storage and management
 
+## Getting Start
+- To get started with this project, clone the repository and install the required python libraries: dotenv, mysql, pandas, zipfile
+- You would need .env file with proper MySQL database connection
+- The key file is <b>run_engine.py</b> 
+
 ## License
 This project is licensed under the MIT License - see the LICENSE file for details.
