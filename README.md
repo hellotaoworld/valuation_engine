@@ -10,7 +10,7 @@ This repository is the data modelling part of the https://dashboard-finance-metr
 ## Technologies Used
 - SEC Financial Statement Data Sets (https://www.sec.gov/dera/data/financial-statement-data-sets)
 - Python for ETL processes and data analytics
-- Cloud MYSQL database for data storage and management
+- Local and Cloud MYSQL database for data storage and management
 
 ## Getting Start
 - To get started with this project, clone the repository and install the required python libraries: dotenv, mysql, pandas, zipfile
