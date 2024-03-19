@@ -1,4 +1,4 @@
-import extract_data, load_mapping, load_data, calculate_metrics, calculate_ranking
+import extract_data, load_mapping, load_data, calculate_metrics, calculate_ranking,update_cloud
 
 print('****** Valuation Engine is triggered *****')
 print('=== Refreshing Mapping ===')
@@ -16,7 +16,7 @@ print('=== Metrics Calculation Completed ===')
 print('=== Start Calculating Ranking ===')
 calculate_ranking.run()
 print('=== Ranking Calculation Completed ===')
-#print('=== Update Cloud Database ===')
-#update_cloud.run()
-#print('=== Cloud Database Updated ===')
-#print('****** Load has been completed successfully *****')
+print('=== Update Cloud Database ===')
+update_cloud.run()
+print('=== Cloud Database Updated ===')
+print('****** Load has been completed successfully *****')
