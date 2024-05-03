@@ -17,6 +17,7 @@ local_config = {
   'user':os.getenv("LOCALDB_USERNAME"),
   'passwd': os.getenv("LOCALDB_PASSWORD"),
   'db': os.getenv("LOCALDB_NAME"),
+  'port':os.getenv("LOCALDB_PORT"),
   'autocommit': True
 }
 

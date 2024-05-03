@@ -10,7 +10,7 @@ def run():
     cursor = connection.cursor()
 
     # Extract files if folder does not exist
-    datasetdir = 'D:/tao_project/data_load'
+    datasetdir = 'C:/Users/Chris/Documents/GitHub/hellotaoworld/data_load'
     rawdir = datasetdir+ "/edgar_dataset/rawdata"
     extractdir = datasetdir + "/edgar_dataset/extract"
     for filename in os.listdir(rawdir):
@@ -56,4 +56,4 @@ def run():
     cursor.close()
     connection.close()
 
-run()
+#run()
