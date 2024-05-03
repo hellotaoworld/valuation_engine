@@ -13,7 +13,9 @@ This repository is the data modelling part of the https://dashboard-finance-metr
 - Local and Cloud MYSQL database for data storage and management
 
 ## Getting Start
-- To get started with this project, clone the repository and install the required python libraries: dotenv, mysql, pandas, zipfile
+- To get started with this project, clone the repository
+- Configure .venv Python environment
+- Install the required python libraries: python-dotenv, mysql-connector-python, pandas, zipfile36, openpyxl
 - You would need .env file with proper MySQL database connection
 - The key file is <b>run_engine.py</b> 
 
