@@ -9,7 +9,8 @@ cloud_config = {
   'user':os.getenv("DB_USERNAME"),
   'passwd': os.getenv("DB_PASSWORD"),
   'db': os.getenv("DB_NAME"),
-  'autocommit': True
+  'autocommit': True,
+  'port': 14971
 }
 
 local_config = {
