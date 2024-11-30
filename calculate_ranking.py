@@ -9,7 +9,7 @@ def transform_symbol(column_list):
   return ["`" + column + "`" for column in column_list]
 
 
-def run():
+def run(company,year):
     # Establish connection and cursor
     connection = database_connection.establish_local_database()
     cursor = connection.cursor()
@@ -54,8 +54,31 @@ def run():
     #metrics_query =f"SELECT * FROM {metric_table_name}"
     #mapping_formula_df = pd.read_sql(metrics_query, connection)
     #formula_names = mapping_formula_df.iloc[:, 4].tolist()
-
-    def calculate_ranking(metric_v):
+    
+    # refresh industries of selected companies 
+    if company==["all"]:
+        industry_query =f"SELECT distinct industry FROM valuation_engine_mapping_sic"
+        params= None 
+    else:
+        placeholders = ', '.join(['%s'] * len(company))
+        industry_query =f"SELECT distinct s.industry FROM valuation_engine_mapping_company c left join valuation_engine_mapping_sic s on c.sic = s.sic where cik in ({placeholders})"
+        params = tuple(company)
+    
+    industry_df = pd.read_sql(industry_query, connection, params = params)
+    #print(industry_df)
+    
+    def calculate_ranking(metric_v, year):
+        # refresh selected year only
+        if year ==["all"]:
+            year_query =f"SELECT distinct report_year as year FROM valuation_engine_metrics WHERE {metric_v} is not null order by report_year"
+            params = None
+        else:
+            placeholders = ', '.join(['%s'] * len(year))
+            year_query =f"SELECT distinct report_year as year FROM valuation_engine_metrics WHERE {metric_v} is not null and report_year in ({placeholders}) order by report_year"
+            params = tuple(year)
+        year_df = pd.read_sql(year_query, connection, params = params)
+        #print(year_df)
+        
         direction_query =f"SELECT formula_direction from valuation_engine_mapping_formula where formula_shortname='{metric_v}'"
         d_df = pd.read_sql(direction_query, connection)
         direction= d_df["formula_direction"][0]
@@ -68,13 +91,6 @@ def run():
         q_df = pd.read_sql(data_query, connection)
         ranking_df = q_df[['cik', 'sic', 'industry', 'company_name','report_year', 'metric_value']]
         ranking_df['metric_name']=metric_v
-        
-        year_query =f"SELECT distinct report_year as year FROM valuation_engine_metrics WHERE {metric_v} is not null order by report_year"
-        year_df = pd.read_sql(year_query, connection)
-        
-        industry_query = f"SELECT distinct industry FROM valuation_engine_mapping_sic"
-        industry_df = pd.read_sql(industry_query, connection)
-        
         
         # calculate ranking per sector, per year
         for industry in industry_df['industry']:
@@ -94,6 +110,7 @@ def run():
                         ranking_df.loc[index,'metric_ranking'] = i
                         i = i + 1
                     
+        ranking_df = ranking_df[ranking_df['metric_ranking'].notna()]
         #print(ranking_df)
         ranking_table_columns = transform_symbol(ranking_df.columns)
         
@@ -108,20 +125,25 @@ def run():
         print(f"Ranking updated successfully for {metric_v}.")  
         
 
-    # Refresh the ratio table with loop calculation for the list of companies
-    truncate_ranking_query = f"TRUNCATE TABLE valuation_engine_metrics_ranking"
-    cursor.execute(truncate_ranking_query)
-    print(f"Table valuation_engine_metrics_ranking is truncated.")
-
-    #calculate_ranking('revenue_growth_rate')
+    # Refresh the ratio table for the list of industries
+    for _, row in industry_df.iterrows():
+        delete_query = f"DELETE FROM valuation_engine_metrics_ranking WHERE industry=%s"
+        #print(delete_query)
+        values = tuple(row)
+        cursor.execute(delete_query, values)
+    print(f"Table valuation_engine_metrics_ranking is cleared for seleted industries.")
 
     # calculate ranking for the list of metrics
     for metric in metric_list:
-        calculate_ranking(metric)
+        calculate_ranking(metric, year)
 
 
     # Close the cursor and connection
     cursor.close()
     connection.close()
 
-#run()
+
+### Enable for testing only ###
+#company_selected = [940944,63908]
+#year_selected="all"
+#run(company_selected,year_selected)

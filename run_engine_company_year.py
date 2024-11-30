@@ -1,12 +1,14 @@
-import extract_data, load_formula_mapping, load_other_mapping, load_data, calculate_metrics, calculate_ranking,update_cloud
-company='all'
-year='all'
+import extract_data, load_data, calculate_metrics, calculate_ranking,update_cloud
+import sys
+
+# company should be in array list format, with the list of selected cik code, or "all"
+# year should be in array list format, yyyy, or "all"
+company =sys.argv[1].split(',')
+#print(company)
+year = sys.argv[2].split(',')
+#print(year)
 
 print('****** Valuation Engine is triggered *****')
-print('=== Refreshing Mapping ===')
-load_formula_mapping.run()
-load_other_mapping.run()
-print('=== Mapping Refreshed ===')
 
 print('=== Extract data ===')
 extract_data.run(company,year)
@@ -23,8 +25,3 @@ print('=== Metrics Calculation Completed ===')
 print('=== Start Calculating Ranking ===')
 calculate_ranking.run(company,year)
 print('=== Ranking Calculation Completed ===')
-
-# print('=== Update Cloud Database ===') 
-# update_cloud.run()
-# print('=== Cloud Database Updated ===')
-# print('****** Load has been completed successfully *****')

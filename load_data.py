@@ -14,7 +14,7 @@ def mapfields(tag, table):
 def transform_symbol(column_list):
   return ["`" + column + "`" for column in column_list]
 
-def run():
+def run(company,year):
     # Establish connection and cursor
     connection = database_connection.establish_local_database()
     cursor = connection.cursor()
@@ -26,7 +26,7 @@ def run():
     mapping_table = pd.concat([mapping_bs, mapping_is, mapping_cfo], axis=1)
 
     # Get Extract dir
-    extractdir = 'C:/Users/Chris/Documents/GitHub/hellotaoworld/data_load/edgar_dataset/extract'
+    extractdir = r"\\DESKTOP-1OH4GP0\Users\Chris\Documents\GitHub\hellotaoworld\data_load\edgar_dataset\extract"
 
     # List of quarters
     extract_list = [item for item in os.listdir(extractdir)]
@@ -36,8 +36,14 @@ def run():
     #df_sp500 = pd.read_sql(company_query, connection)
 
     # Get picked companies
-    company_query =f"SELECT * FROM valuation_engine_mapping_company"
-    df_sp500 = pd.read_sql(company_query, connection)
+    if company==['all']:
+        company_query =f"SELECT cik FROM valuation_engine_mapping_company"
+        params= None 
+    else:
+        placeholders = ', '.join(['%s'] * len(company))
+        company_query =f"SELECT cik FROM valuation_engine_mapping_company where cik in ({placeholders})"
+        params =tuple(company)
+    df_sp500 = pd.read_sql(company_query, connection, params = params)
     #print(df_sp500)
 
         
@@ -92,24 +98,29 @@ def run():
             df_sp500num['fy'] = df_sp500num['adsh'].apply(lambda x: adsh_sub[x]['fy'] if x in adsh_sub else None)
             df_sp500num['updated_file']=qtr
             #print(df_sp500num)
-
+        
+            # Load dataset df_sp500num
+            column_list = transform_symbol(df_sp500num.columns)
+            for _, row in df_sp500num.iterrows():
+                insert_query = f"INSERT INTO valuation_engine_inputs ({', '.join(column_list)}) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) ON DUPLICATE KEY UPDATE adsh=VALUES(adsh), coreg=VALUES(coreg), version=VALUES(version), qtrs=VALUES(qtrs), uom=VALUES(uom), value=VALUES(value), footnote=VALUES(footnote), mapping=VALUES(mapping), updated_file=VALUES(updated_file), fy=VALUES(fy)"
+                values = tuple(row)
+                cursor.execute(insert_query, values)
+            
+            #Commit the database change for a single file
+            connection.commit()
+            print(f"Data imported successfully from {qtr}.")
+        
         except Exception as e:
-            print(f"Failed to read {numfile}: {e}")
-        
-        # Load dataset df_sp500num
-        column_list = transform_symbol(df_sp500num.columns)
-        for _, row in df_sp500num.iterrows():
-            insert_query = f"INSERT INTO valuation_engine_inputs ({', '.join(column_list)}) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) ON DUPLICATE KEY UPDATE adsh=VALUES(adsh), coreg=VALUES(coreg), version=VALUES(version), qtrs=VALUES(qtrs), uom=VALUES(uom), value=VALUES(value), footnote=VALUES(footnote), mapping=VALUES(mapping), updated_file=VALUES(updated_file), fy=VALUES(fy)"
-            values = tuple(row)
-            cursor.execute(insert_query, values)
-        
-        #Commit the database change for a single file
-        connection.commit()
-        print(f"Data imported successfully for {qtr}.")
-
+            #print(f"Failed to read {numfile}: {e}")
+            print(f"no data extracted from {qtr} for selected companies.")
+            
     for qtr in extract_list:
-        year = int(qtr[:4])
-        load_extract(qtr)    
+        qtryear = int(qtr[:4])
+        if year ==["all"]:
+            load_extract(qtr)
+        else:
+            if qtryear in year:
+                load_extract(qtr)    
     # load_extract('2017q3')
 
     # Close the cursor and connection
@@ -117,4 +128,7 @@ def run():
     connection.close()
 
 
-#run()
+### Enable for testing only ###
+#company_selected = [940944,63908]
+#year_selected=[2024]
+#run(company_selected,year_selected)

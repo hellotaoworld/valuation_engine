@@ -18,7 +18,7 @@ def ad(dataframe, index, field):
         return 0
 
 
-def run():
+def run(company,year):
     # Establish connection and cursor
     connection = database_connection.establish_local_database()
     cursor = connection.cursor()
@@ -29,15 +29,27 @@ def run():
     formula_names = mapping_formula_df['formula_shortname'].tolist()
     
     # Read company list (add criteria to be picked)
-    company_query =f"SELECT * FROM valuation_engine_mapping_company"
-    company_df = pd.read_sql(company_query, connection)
+    if company==['all']:
+        company_query =f"SELECT cik FROM valuation_engine_mapping_company"
+        params= None 
+    else:
+        placeholders = ', '.join(['%s'] * len(company))
+        company_query =f"SELECT cik FROM valuation_engine_mapping_company where cik in ({placeholders})"
+        params =tuple(company)
+    company_df = pd.read_sql(company_query, connection, params = params)
     ciklist = company_df['cik'].tolist()
-    company_names = company_df['company'].tolist()
+    #company_names = company_df['company'].tolist()
     
     ### function ###
-    def calculate_metrics(cik):
-        data_query =f"SELECT i.cik, left(i.ddate,4) as 'report_year', c.company as 'company_name', i.mapping, i.value FROM valuation_engine_inputs i left join valuation_engine_mapping_company c on i.cik=c.cik WHERE i.cik='{cik}' and i.fy =(SELECT max(fy) from web_application.valuation_engine_inputs where cik=i.cik and mapping =i.mapping and left(ddate,4)=left(i.ddate,4))"
-        input_df = pd.read_sql(data_query, connection)
+    def calculate_metrics(cik, year):
+        if year ==["all"]:
+            data_query =f"SELECT i.cik, left(i.ddate,4) as 'report_year', c.company as 'company_name', i.mapping, i.value FROM valuation_engine_inputs i left join valuation_engine_mapping_company c on i.cik=c.cik WHERE i.cik='{cik}' and i.fy =(SELECT max(fy) from web_application.valuation_engine_inputs where cik=i.cik and mapping =i.mapping and left(ddate,4)=left(i.ddate,4))"
+            params = None
+        else:
+            yr_placeholder = ', '.join(['%s'] * len(year))
+            data_query =f"SELECT i.cik, left(i.ddate,4) as 'report_year', c.company as 'company_name', i.mapping, i.value FROM valuation_engine_inputs i left join valuation_engine_mapping_company c on i.cik=c.cik WHERE i.cik='{cik}' and i.fy IN ({yr_placeholder})"
+            params = tuple(year)
+        input_df = pd.read_sql(data_query, connection, params =params)
         # print(input_df)
         q_df = input_df.pivot_table(index=['cik', 'report_year', 'company_name'],columns='mapping', values='value',aggfunc='max').reset_index()
         # print(q_df)
@@ -75,17 +87,25 @@ def run():
             cursor.execute(insert_query, values)
         connection.commit()
         print(f"Ratio updated successfully for {cik}.")   
-
-    truncate_metric_query = f"TRUNCATE TABLE valuation_engine_metrics"
-    cursor.execute(truncate_metric_query)
-    print(f"Table valuation_engine_metrics is truncated.")
     
+    # Refresh metric table for selected companies
     for cik in ciklist:
-        calculate_metrics(cik)        
+        if year ==["all"]:
+            delete_query = f"DELETE FROM valuation_engine_metrics WHERE cik=%s"
+            params =(cik, )
+        else:
+            placeholders = ', '.join(['%s'] * len(year))
+            delete_query = f"DELETE FROM valuation_engine_metrics WHERE cik=%s and report_year in ({placeholders})"
+            params = (cik,) + tuple(year)
+        cursor.execute(delete_query, params=params)
+        calculate_metrics(cik, year)        
     # calculate_metrics('34088')
     
     # Close the cursor and connection
     cursor.close()
     connection.close()
 
-# run()
+### Enable for testing only ###
+#company_selected = [940944,63908]
+#year_selected=["all"]
+#run(company_selected,year_selected)
