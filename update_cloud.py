@@ -27,14 +27,15 @@ def run():
   # Load company table
   mapping_company_df = pd.read_sql(f"SELECT * FROM valuation_engine_mapping_company", connection)
   company_collist = transform_symbol(mapping_company_df.columns)
+  #print(mapping_company_df)
   for _, row in mapping_company_df.iterrows():
-        insert_query = f"INSERT INTO valuation_engine_mapping_company ({', '.join(company_collist)}) VALUES (%s,%s,%s,%s,%s,%s) ON DUPLICATE KEY UPDATE symbol=VALUES(symbol), company=VALUES(company), sic=VALUES(sic), industry=VALUES(industry), type=Values(type)"
+        insert_query = f"INSERT INTO valuation_engine_mapping_company ({', '.join(company_collist)}) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s) ON DUPLICATE KEY UPDATE symbol=VALUES(symbol), company=VALUES(company), sic=VALUES(sic), industry=VALUES(industry), type=Values(type), fye=values(fye), qtr=values(qtr), exchange=values(exchange)"
         values = tuple(row)
         cursor_cloud.execute(insert_query, values) 
   print("valuation_engine_mapping_company is loaded.")
   
   # Load URL table
-  url_query = f"SELECT * FROM web_application.valuation_engine_urls where stmt in ('BS','CF','IS') and fy >=2012 and cik in (SELECT cik from web_application.valuation_engine_mapping_company where `type`='pick');"
+  url_query = f"SELECT * FROM web_application.valuation_engine_urls where stmt in ('BS','CF','IS') and fy >=2012 and cik in (SELECT cik from web_application.valuation_engine_mapping_company);"
   url_df = pd.read_sql(url_query, connection)
   url_collist = transform_symbol(url_df.columns)
   for _, row in url_df.iterrows():

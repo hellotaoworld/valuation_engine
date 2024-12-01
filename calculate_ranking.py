@@ -56,7 +56,7 @@ def run(company,year):
     #formula_names = mapping_formula_df.iloc[:, 4].tolist()
     
     # refresh industries of selected companies 
-    if company==["all"]:
+    if company==["All"]:
         industry_query =f"SELECT distinct industry FROM valuation_engine_mapping_sic"
         params= None 
     else:
@@ -69,7 +69,7 @@ def run(company,year):
     
     def calculate_ranking(metric_v, year):
         # refresh selected year only
-        if year ==["all"]:
+        if year ==["All"]:
             year_query =f"SELECT distinct report_year as year FROM valuation_engine_metrics WHERE {metric_v} is not null order by report_year"
             params = None
         else:
@@ -122,14 +122,14 @@ def run(company,year):
             #print(values)
             cursor.execute(insert_query, values)
         connection.commit()
-        print(f"Ranking updated successfully for {metric_v}.")  
+        print(f"Ranking updated successfully for {metric_v}.", flush=True)  
         
 
     # Refresh the ratio table for the list of industries
     for _, row in industry_df.iterrows():
         industry = row['industry']
         
-        if year ==["all"]:
+        if year ==["All"]:
             delete_query = f"DELETE FROM valuation_engine_metrics_ranking WHERE industry=%s"
             params =(industry,)
         else:
@@ -138,7 +138,7 @@ def run(company,year):
             params =(industry,) + tuple(year)
         #print(delete_query)
         cursor.execute(delete_query, params= params)
-    print(f"Table valuation_engine_metrics_ranking is cleared for seleted industries.")
+    print(f"Table valuation_engine_metrics_ranking is cleared for seleted industries.", flush=True)
 
     # calculate ranking for the list of metrics
     for metric in metric_list:
@@ -152,5 +152,5 @@ def run(company,year):
 
 ### Enable for testing only ###
 # company_selected = [909832]
-# year_selected=["all"]
+# year_selected=["All"]
 # run(company_selected,year_selected)

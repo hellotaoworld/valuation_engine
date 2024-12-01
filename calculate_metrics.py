@@ -42,7 +42,7 @@ def run(company,year):
     
     ### function ###
     def calculate_metrics(cik, year):
-        if year ==["all"]:
+        if year ==["All"]:
             data_query =f"SELECT i.cik, left(i.ddate,4) as 'report_year', c.company as 'company_name', i.mapping, i.value FROM valuation_engine_inputs i left join valuation_engine_mapping_company c on i.cik=c.cik WHERE i.cik='{cik}'"
             params = None
         else:
@@ -52,7 +52,7 @@ def run(company,year):
         input_df = pd.read_sql(data_query, connection, params =params)
         #print(input_df)
         q_df = input_df.pivot_table(index=['cik', 'report_year', 'company_name'],columns='mapping', values='value',aggfunc='max').reset_index()
-        if year !=["all"]:
+        if year !=["All"]:
             q_df = q_df[q_df['report_year'].isin(year)]
         #print(q_df)
 
@@ -89,11 +89,11 @@ def run(company,year):
             values = tuple(row)
             cursor.execute(insert_query, values)
         connection.commit()
-        print(f"Ratio updated successfully for {cik}.")   
+        print(f"Ratio updated successfully for {cik}.", flush=True)   
     
     # Refresh metric table for selected companies
     for cik in ciklist:
-        if year ==["all"]:
+        if year ==["All"]:
             delete_query = f"DELETE FROM valuation_engine_metrics WHERE cik=%s"
             params =(cik, )
         else:
@@ -109,6 +109,6 @@ def run(company,year):
     connection.close()
 
 ### Enable for testing only ###
-# company_selected = [909832]
-# year_selected=["all"]
-# run(company_selected,year_selected)
+#company_selected = [910638]
+#year_selected=["All"]
+#run(company_selected,year_selected)

@@ -58,7 +58,7 @@ def run(company,year):
             df_sub = df_sub[df_sub['form'].apply(lambda form: form=="10-K")]
             df_sp500sub = df_sub[df_sub['cik'].isin(df_sp500['cik'])]
         except Exception as e:
-            print(f"Failed to read {subfile}: {e}")
+            print(f"Failed to read {subfile}: {e}", flush=True)
 
         # Get pre file
         prefile = extractdir+"/"+qtr+"/pre.txt"
@@ -69,7 +69,7 @@ def run(company,year):
             df_sp500pre = df_sp500pre[['adsh', 'report', 'stmt']]
             df_sp500pre = df_sp500pre[['adsh', 'report', 'stmt']].drop_duplicates()
         except Exception as e:
-            print(f"Failed to read {prefile}: {e}")
+            print(f"Failed to read {prefile}: {e}", flush=True)
         
         # create adsh mapping
         adsh_sub = {row['adsh']: {'cik': row['cik'], 'fy': row['fy']} for _, row in df_sp500sub.iterrows()}
@@ -108,15 +108,15 @@ def run(company,year):
             
             #Commit the database change for a single file
             connection.commit()
-            print(f"Data imported successfully from {qtr}.")
+            print(f"Data imported successfully from {qtr}.", flush=True)
         
         except Exception as e:
             #print(f"Failed to read {numfile}: {e}")
-            print(f"no data extracted from {qtr} for selected companies.")
+            print(f"no data extracted from {qtr} for selected companies.", flush=True)
             
     for qtr in extract_list:
         qtryear = int(qtr[:4])
-        if year ==["all"]:
+        if year ==["All"]:
             load_extract(qtr)
         else:
             if qtryear in year:
