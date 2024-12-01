@@ -72,10 +72,12 @@ def run(company,year):
         qtryear = int(qtr[:4])
         if year ==["all"]:
             check_file(qtr)
+            print(f"Done extracting {qtr}.") 
         else:
             if qtryear in year:
                 check_file(qtr)
-        print(f"Done extracting {qtr}.") 
+                print(f"Done extracting {qtr}.") 
+        
     
     
     # Close the cursor and connection

@@ -1,6 +1,6 @@
 import extract_data, load_formula_mapping, load_other_mapping, load_data, calculate_metrics, calculate_ranking,update_cloud
-company='all'
-year='all'
+company=['all']
+year=['all']
 
 print('****** Valuation Engine is triggered *****')
 print('=== Refreshing Mapping ===')

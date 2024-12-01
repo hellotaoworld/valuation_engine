@@ -50,9 +50,10 @@ def run(company,year):
             data_query =f"SELECT i.cik, left(i.ddate,4) as 'report_year', c.company as 'company_name', i.mapping, i.value FROM valuation_engine_inputs i left join valuation_engine_mapping_company c on i.cik=c.cik WHERE i.cik='{cik}' and i.fy IN ({yr_placeholder})"
             params = tuple(year)
         input_df = pd.read_sql(data_query, connection, params =params)
-        # print(input_df)
+        #print(input_df)
         q_df = input_df.pivot_table(index=['cik', 'report_year', 'company_name'],columns='mapping', values='value',aggfunc='max').reset_index()
-        # print(q_df)
+        q_df = q_df[q_df['report_year'].isin(year)]
+        #print(q_df)
 
         column_list = q_df.columns
         #print(column_list)

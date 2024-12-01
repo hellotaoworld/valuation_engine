@@ -127,10 +127,17 @@ def run(company,year):
 
     # Refresh the ratio table for the list of industries
     for _, row in industry_df.iterrows():
-        delete_query = f"DELETE FROM valuation_engine_metrics_ranking WHERE industry=%s"
+        industry = row['industry']
+        
+        if year ==["all"]:
+            delete_query = f"DELETE FROM valuation_engine_metrics_ranking WHERE industry=%s"
+            params =(industry,)
+        else:
+            placeholders = ', '.join(['%s'] * len(year))
+            delete_query = f"DELETE FROM valuation_engine_metrics_ranking WHERE industry=%s and report_year in ({placeholders})"
+            params =(industry,) + tuple(year)
         #print(delete_query)
-        values = tuple(row)
-        cursor.execute(delete_query, values)
+        cursor.execute(delete_query, params= params)
     print(f"Table valuation_engine_metrics_ranking is cleared for seleted industries.")
 
     # calculate ranking for the list of metrics
@@ -144,6 +151,6 @@ def run(company,year):
 
 
 ### Enable for testing only ###
-#company_selected = [940944,63908]
-#year_selected="all"
+#company_selected = [935703]
+#year_selected=["all"]
 #run(company_selected,year_selected)
