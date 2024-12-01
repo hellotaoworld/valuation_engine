@@ -3,6 +3,8 @@ import os
 import pandas as pd
 from datetime import datetime
 import zipfile
+import yfinance as yf
+import time 
 
 def run(company,year):
     # Establish connection and cursor
@@ -49,21 +51,30 @@ def run(company,year):
         # Get company selected
         if company==['all']:
             company_query =f"SELECT cik FROM valuation_engine_mapping_company"
+            ticker_query=f"SELECT cik,symbol FROM valuation_engine_mapping_company"
             params= None 
         else:
             placeholders = ', '.join(['%s'] * len(company))
             company_query =f"SELECT cik FROM valuation_engine_mapping_company where cik in ({placeholders})"
+            ticker_query=f"SELECT cik,symbol FROM valuation_engine_mapping_company where cik in ({placeholders})"
             params =tuple(company)
         
         df_sp500 = pd.read_sql(company_query, connection, params = params)
+        df_sp500ticker = pd.read_sql(ticker_query, connection, params = params)
 
         df_sp500sub = df_sub[df_sub['cik'].isin(df_sp500['cik'])]
-        #print(df_sp500sub)
+        df_sp500sub = df_sp500sub.merge(df_sp500ticker[['cik', 'symbol']], on= 'cik', how='left')
+        
+        print(df_sp500sub)
         # Update company mapping on SIC code
         for _, row in df_sp500sub.iterrows():
-            update_sic = f"UPDATE valuation_engine_mapping_company SET sic=%s, fye=%s, qtr =%s  WHERE cik=%s"
-            values = tuple(row)
+            #### for exchange market field ####
+            #exchange_info = yf.Ticker(row['symbol']).info.get("exchange", None)
+            #update_sic = f"UPDATE valuation_engine_mapping_company SET sic=%s, fye=%s, qtr =%s, exchange=%s  WHERE cik=%s"
+            #values = (row['sic'], row['period'], row['yyyyqx'], exchange_info, row['cik'])
             #print(values)
+            update_sic = f"UPDATE valuation_engine_mapping_company SET sic=%s, fye=%s, qtr =%s, WHERE cik=%s"
+            values = (row['sic'], row['period'], row['yyyyqx'], row['cik'])
             cursor.execute(update_sic, values)
             update_industry = f"UPDATE valuation_engine_mapping_company c left join valuation_engine_mapping_sic s on c.sic=s.sic SET c.industry=s.industry"
             cursor.execute(update_industry)
