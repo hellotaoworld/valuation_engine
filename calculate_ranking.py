@@ -151,6 +151,6 @@ def run(company,year):
 
 
 ### Enable for testing only ###
-#company_selected = [935703]
-#year_selected=["all"]
-#run(company_selected,year_selected)
+# company_selected = [909832]
+# year_selected=["all"]
+# run(company_selected,year_selected)

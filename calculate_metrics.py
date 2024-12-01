@@ -43,7 +43,7 @@ def run(company,year):
     ### function ###
     def calculate_metrics(cik, year):
         if year ==["all"]:
-            data_query =f"SELECT i.cik, left(i.ddate,4) as 'report_year', c.company as 'company_name', i.mapping, i.value FROM valuation_engine_inputs i left join valuation_engine_mapping_company c on i.cik=c.cik WHERE i.cik='{cik}' and i.fy =(SELECT max(fy) from web_application.valuation_engine_inputs where cik=i.cik and mapping =i.mapping and left(ddate,4)=left(i.ddate,4))"
+            data_query =f"SELECT i.cik, left(i.ddate,4) as 'report_year', c.company as 'company_name', i.mapping, i.value FROM valuation_engine_inputs i left join valuation_engine_mapping_company c on i.cik=c.cik WHERE i.cik='{cik}'"
             params = None
         else:
             yr_placeholder = ', '.join(['%s'] * len(year))
@@ -52,17 +52,18 @@ def run(company,year):
         input_df = pd.read_sql(data_query, connection, params =params)
         #print(input_df)
         q_df = input_df.pivot_table(index=['cik', 'report_year', 'company_name'],columns='mapping', values='value',aggfunc='max').reset_index()
-        q_df = q_df[q_df['report_year'].isin(year)]
+        if year !=["all"]:
+            q_df = q_df[q_df['report_year'].isin(year)]
         #print(q_df)
 
         column_list = q_df.columns
         #print(column_list)
         # Load into database 
-        for _, row in q_df.iterrows():
-            insert_query = f"INSERT INTO valuation_engine_values ({', '.join(transform_symbol(column_list))}) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
+        # for _, row in q_df.iterrows():
+        #     insert_query = f"INSERT INTO valuation_engine_values ({', '.join(transform_symbol(column_list))}) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
             
-            values = tuple(row)
-            #cursor.execute(insert_query, values)
+        #     values = tuple(row)
+        #     cursor.execute(insert_query, values)
 
         ratio_df = q_df[['cik', 'report_year', 'company_name']]
         #print(q_df['is.net_revenue'])
@@ -80,6 +81,7 @@ def run(company,year):
         # Replace inf and -inf values with NULL
         ratio_df = ratio_df.replace([np.inf, -np.inf], np.nan)
         column_list = ratio_df.columns
+        print(ratio_df)
         #print(column_list)
         # Load into database 
         for _, row in ratio_df.iterrows():
@@ -107,6 +109,6 @@ def run(company,year):
     connection.close()
 
 ### Enable for testing only ###
-#company_selected = [940944,63908]
-#year_selected=["all"]
-#run(company_selected,year_selected)
+# company_selected = [909832]
+# year_selected=["all"]
+# run(company_selected,year_selected)
