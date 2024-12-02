@@ -15,7 +15,7 @@ This repository is the data modelling part of the https://dashboard-finance-metr
 ## Getting Start
 - To get started with this project, clone the repository
 - Configure .venv Python environment (https://code.visualstudio.com/docs/python/environments)  python version= 3.7
-- Install the required python libraries: py -m pip install python-dotenv, mysql-connector-python (8.0.33), pandas, zipfile36, openpyxl, yfinance
+- Install the required python libraries: py -m pip install python-dotenv, mysql-connector-python (8.0.33), pandas, zipfile36, openpyxl, yfinance, secure-smtplib
 - You would need .env file with proper MySQL database connection
 - The key file is <b>run_engine.py</b> 
 

@@ -1,6 +1,15 @@
-import extract_data, load_data, calculate_metrics, calculate_ranking,update_cloud
+import extract_data, load_data, calculate_metrics, calculate_ranking,update_cloud, send_email
+from datetime import datetime
+import pytz
 import sys
-print("****** Valuation Engine is triggered *****", flush=True)
+def gettime():
+    est = pytz.timezone('US/Eastern')
+    current_time = datetime.now(est)
+    formatted_time = current_time.strftime('%Y-%m-%d %H:%M:%S %Z')
+    return formatted_time
+
+start_time =gettime()
+print(f"****** Valuation Engine is triggered {start_time}*****", flush=True)
 
 # company should be in array list format, with the list of selected cik code, or "all"
 # year should be in array list format, yyyy, or "all"
@@ -9,18 +18,35 @@ print(company, flush=True)
 year = sys.argv[2].split(',')
 print(year, flush=True)
 
-print('=== Extract data ===', flush=True)
-extract_data.run(company,year)
-print('=== Data extracted ===', flush=True)
+try:
+    
+    print(f'=== Extract data {gettime()} ===', flush=True)
+    extract_data.run(company,year)
+    print(f'=== Data extracted ===', flush=True)
 
-print('=== Start Loading Data ===', flush=True)
-load_data.run(company,year)
-print('=== Data Load Completed ===', flush=True)
+    print(f'=== Start Loading Data {gettime()} ===', flush=True)
+    load_data.run(company,year)
+    print(f'=== Data Load Completed ===', flush=True)
 
-print('=== Start Calculating Metrics ===', flush=True)
-calculate_metrics.run(company,year)
-print('=== Metrics Calculation Completed ===', flush=True)
+    print(f'=== Start Calculating Metrics {gettime()} ===', flush=True)
+    calculate_metrics.run(company,year)
+    print(f'=== Metrics Calculation Completed ===', flush=True)
 
-print('=== Start Calculating Ranking ===', flush=True)
-calculate_ranking.run(company,year)
-print('=== Ranking Calculation Completed ===', flush=True)
+    print(f'=== Start Calculating Ranking {gettime()} ===', flush=True)
+    calculate_ranking.run(company,year)
+    print(f'=== Ranking Calculation Completed ===', flush=True)
+    
+    end_time =gettime()
+    print(f"****** Valuation Engine Finished Successfully {end_time} *****", flush=True)
+    send_email.send_email(
+            subject="Success: Python Script Completed",
+            body=f"Hi, \n\nValuation Engine has finished executing successfully. \nVariable Input - Company: {company}; Year: {year}\nTime Start: {start_time} \nTime End: {end_time} \n\nEnjoy!",
+            to_email="pienuuu@gmail.com"
+        )
+except Exception as e:
+    print(f"An error occurred: {e}")
+    send_email.send_email(
+            subject="Fail: Python Script Error",
+            body=f"Hi, \n\nValuation Engine has encountered errors. \nVariable Input - Company: {company}; Year: {year}\nTime Start: {start_time} \nTime End: {gettime()} \n\nError:\nAn error occurred: {e}",
+            to_email="pienuuu@gmail.com"
+        )
