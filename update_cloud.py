@@ -22,7 +22,9 @@ def run():
         insert_query = f"INSERT INTO valuation_engine_mapping_formula ({', '.join(formula_column_names)}) VALUES (%s,%s,%s,%s,%s,%s,%s) ON DUPLICATE KEY UPDATE formula_name=VALUES(formula_name),formula_value=VALUES(formula_value),formula_pseudo_code=VALUES(formula_pseudo_code),formula_category=VALUES(formula_category),formula_type=VALUES(formula_type),formula_direction=VALUES(formula_direction)"
         values = tuple(row)
         cursor_cloud.execute(insert_query, values)
-  print("valuation_engine_mapping_formula is loaded.")
+  connection.commit()
+  connection_cloud.commit() 
+  print("valuation_engine_mapping_formula is loaded." ,flush=True)
         
   # Load company table
   mapping_company_df = pd.read_sql(f"SELECT * FROM valuation_engine_mapping_company", connection)
@@ -32,7 +34,9 @@ def run():
         insert_query = f"INSERT INTO valuation_engine_mapping_company ({', '.join(company_collist)}) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s) ON DUPLICATE KEY UPDATE symbol=VALUES(symbol), company=VALUES(company), sic=VALUES(sic), industry=VALUES(industry), type=Values(type), fye=values(fye), qtr=values(qtr), exchange=values(exchange)"
         values = tuple(row)
         cursor_cloud.execute(insert_query, values) 
-  print("valuation_engine_mapping_company is loaded.")
+  connection.commit()
+  connection_cloud.commit() 
+  print("valuation_engine_mapping_company is loaded.",flush=True)
   
   # Load URL table
   url_query = f"SELECT * FROM web_application.valuation_engine_urls where stmt in ('BS','CF','IS') and fy >=2012 and cik in (SELECT cik from web_application.valuation_engine_mapping_company);"
@@ -42,7 +46,9 @@ def run():
         insert_query = f"INSERT INTO valuation_engine_urls ({', '.join(url_collist)}) VALUES (%s,%s,%s,%s,%s,%s) ON DUPLICATE KEY UPDATE adsh=VALUES(adsh), stmt=VALUES(stmt), url=VALUES(url)"
         values = tuple(row)
         cursor_cloud.execute(insert_query, values) 
-  print("valuation_engine_urls is loaded.")
+  connection.commit()
+  connection_cloud.commit() 
+  print("valuation_engine_urls is loaded.",flush=True)
         
   # Load Ranking table
   ranking_query = f"SELECT * FROM web_application.valuation_engine_metrics_ranking;"
@@ -52,10 +58,12 @@ def run():
         insert_query = f"INSERT INTO valuation_engine_metrics_ranking ({', '.join(ranking_collist)}) VALUES (%s,%s,%s,%s,%s,%s,%s,%s) ON DUPLICATE KEY UPDATE sic=VALUES(sic), industry=VALUES(industry), company_name=VALUES(company_name), metric_value=VALUES(metric_value), metric_ranking=VALUES(metric_ranking)"
         values = tuple(row)
         cursor_cloud.execute(insert_query, values)
-  print("valuation_engine_metrics_ranking is loaded.")
   
   connection.commit()
   connection_cloud.commit()  
+  print("valuation_engine_metrics_ranking is loaded.",flush=True)
+  
+
   # Close the cursor and connection
   cursor_cloud.close()
   connection.close()

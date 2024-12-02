@@ -1,4 +1,4 @@
-import extract_data, load_data, calculate_metrics, calculate_ranking,update_cloud, send_email
+import extract_data, load_data, calculate_metrics, calculate_ranking, send_email
 from datetime import datetime
 import pytz
 import sys
