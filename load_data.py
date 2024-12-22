@@ -115,7 +115,7 @@ def run(company,year):
             print(f"no data extracted from {qtr} for selected companies.", flush=True)
             
     for qtr in extract_list:
-        qtryear = int(qtr[:4])
+        qtryear = qtr[:4]
         if year ==["All"]:
             load_extract(qtr)
         else:

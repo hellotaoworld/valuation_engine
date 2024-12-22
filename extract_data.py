@@ -3,7 +3,7 @@ import os
 import pandas as pd
 from datetime import datetime
 import zipfile
-import yfinance as yf
+#import yfinance as yf
 import time 
 
 def run(company,year):
@@ -78,9 +78,9 @@ def run(company,year):
             cursor.execute(update_sic, values)
             update_industry = f"UPDATE valuation_engine_mapping_company c left join valuation_engine_mapping_sic s on c.sic=s.sic SET c.industry=s.industry"
             cursor.execute(update_industry)
-    
+    print(year)
     for qtr in extract_list:
-        qtryear = int(qtr[:4])
+        qtryear = qtr[:4]
         if year ==["All"]:
             check_file(qtr)
             print(f"Done extracting {qtr}.", flush=True) 
