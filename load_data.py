@@ -131,6 +131,6 @@ def run(company,year):
 
 
 ### Enable for testing only ###
-company_selected = [1704720]
-year_selected=[2020]
-run(company_selected,year_selected)
+#company_selected = [1704720]
+#year_selected=[2020]
+#run(company_selected,year_selected)
