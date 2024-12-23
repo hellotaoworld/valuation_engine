@@ -16,7 +16,7 @@ def run():
   # Company Mapping
   # Truncate company mapping   
   truncate_query = f"TRUNCATE TABLE valuation_engine_mapping_company"
-  cursor.execute(truncate_query)
+  #cursor.execute(truncate_query)
   
   company_collist = ['`cik`','`symbol`','`company`']
   

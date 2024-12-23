@@ -73,11 +73,17 @@ def run(company,year):
             #update_sic = f"UPDATE valuation_engine_mapping_company SET sic=%s, fye=%s, qtr =%s, exchange=%s  WHERE cik=%s"
             #values = (row['sic'], row['period'], row['yyyyqx'], exchange_info, row['cik'])
             #print(values)
-            update_sic = f"UPDATE valuation_engine_mapping_company SET sic=%s, fye=%s, qtr =%s WHERE cik=%s"
-            values = (row['sic'], row['period'], row['yyyyqx'], row['cik'])
-            cursor.execute(update_sic, values)
-            update_industry = f"UPDATE valuation_engine_mapping_company c left join valuation_engine_mapping_sic s on c.sic=s.sic SET c.industry=s.industry"
-            cursor.execute(update_industry)
+            
+            ## Changed on Dec22/24 - sic and industry can only be controlled from company mapping table.
+            # update_sic = f"UPDATE valuation_engine_mapping_company SET sic=%s, fye=%s, qtr =%s WHERE cik=%s"
+            # values = (row['sic'], row['period'], row['yyyyqx'], row['cik'])
+            # cursor.execute(update_sic, values)
+            #update_industry = f"UPDATE valuation_engine_mapping_company c left join #valuation_engine_mapping_sic s on c.sic=s.sic SET c.industry=s.industry"
+            #cursor.execute(update_industry)
+            
+            update_fye = f"UPDATE valuation_engine_mapping_company SET fye=%s, qtr =%s WHERE cik=%s"
+            values = (row['period'], row['yyyyqx'], row['cik'])
+            cursor.execute(update_fye, values)
     #print(year)
     for qtr in extract_list:
         qtryear = qtr[:4]

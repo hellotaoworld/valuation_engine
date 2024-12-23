@@ -31,7 +31,7 @@ def run():
   company_collist = transform_symbol(mapping_company_df.columns)
   #print(mapping_company_df)
   for _, row in mapping_company_df.iterrows():
-        insert_query = f"INSERT INTO valuation_engine_mapping_company ({', '.join(company_collist)}) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s) ON DUPLICATE KEY UPDATE symbol=VALUES(symbol), company=VALUES(company), sic=VALUES(sic), industry=VALUES(industry), type=Values(type), fye=values(fye), qtr=values(qtr), exchange=values(exchange)"
+        insert_query = f"INSERT INTO valuation_engine_mapping_company ({', '.join(company_collist)}) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) ON DUPLICATE KEY UPDATE symbol=VALUES(symbol), company=VALUES(company), sic=VALUES(sic), industry=VALUES(industry), type=Values(type), fye=values(fye), qtr=values(qtr), exchange=values(exchange), type_fav=Values(type_fav)"
         values = tuple(row)
         cursor_cloud.execute(insert_query, values) 
   connection.commit()

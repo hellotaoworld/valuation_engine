@@ -111,6 +111,7 @@ def run(company,year):
                         i = i + 1
                     
         ranking_df = ranking_df[ranking_df['metric_ranking'].notna()]
+        ranking_df = ranking_df.replace({np.nan: None})
         #print(ranking_df)
         ranking_table_columns = transform_symbol(ranking_df.columns)
         

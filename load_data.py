@@ -113,7 +113,7 @@ def run(company,year):
             print(f"Data imported successfully from {qtr}.", flush=True)
         
         except Exception as e:
-            print(f"Exception: Failed to read {numfile}: {e}")
+            #print(f"Exception: Failed to read {numfile}: {e}")
             print(f"no data extracted from {qtr} for selected companies.", flush=True)
             
     for qtr in extract_list:

@@ -80,6 +80,7 @@ def run(company,year):
         
         # Replace inf and -inf values with NULL
         ratio_df = ratio_df.replace([np.inf, -np.inf], np.nan)
+        ratio_df=ratio_df.replace({np.nan: None})
         column_list = ratio_df.columns
         #print(ratio_df)
         #print(column_list)
