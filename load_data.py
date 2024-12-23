@@ -1,6 +1,7 @@
 import database_connection
 import os
 import pandas as pd
+import numpy as np
 from datetime import datetime
 import zipfile
 
@@ -97,6 +98,7 @@ def run(company,year):
             df_sp500num['cik'] = df_sp500num['adsh'].apply(lambda x: adsh_sub[x]['cik'] if x in adsh_sub else None)
             df_sp500num['fy'] = df_sp500num['adsh'].apply(lambda x: adsh_sub[x]['fy'] if x in adsh_sub else None)
             df_sp500num['updated_file']=qtr
+            df_sp500num = df_sp500num.replace({np.nan: None})
             #print(df_sp500num)
         
             # Load dataset df_sp500num
@@ -111,7 +113,7 @@ def run(company,year):
             print(f"Data imported successfully from {qtr}.", flush=True)
         
         except Exception as e:
-            #print(f"Failed to read {numfile}: {e}")
+            print(f"Exception: Failed to read {numfile}: {e}")
             print(f"no data extracted from {qtr} for selected companies.", flush=True)
             
     for qtr in extract_list:
@@ -129,6 +131,6 @@ def run(company,year):
 
 
 ### Enable for testing only ###
-#company_selected = [940944,63908]
-#year_selected=[2024]
-#run(company_selected,year_selected)
+company_selected = [1704720]
+year_selected=[2020]
+run(company_selected,year_selected)

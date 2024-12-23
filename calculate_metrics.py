@@ -81,7 +81,7 @@ def run(company,year):
         # Replace inf and -inf values with NULL
         ratio_df = ratio_df.replace([np.inf, -np.inf], np.nan)
         column_list = ratio_df.columns
-        print(ratio_df)
+        #print(ratio_df)
         #print(column_list)
         # Load into database 
         for _, row in ratio_df.iterrows():

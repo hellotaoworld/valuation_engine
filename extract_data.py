@@ -78,7 +78,7 @@ def run(company,year):
             cursor.execute(update_sic, values)
             update_industry = f"UPDATE valuation_engine_mapping_company c left join valuation_engine_mapping_sic s on c.sic=s.sic SET c.industry=s.industry"
             cursor.execute(update_industry)
-    print(year)
+    #print(year)
     for qtr in extract_list:
         qtryear = qtr[:4]
         if year ==["All"]:

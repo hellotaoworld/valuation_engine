@@ -116,7 +116,7 @@ def run(company,year):
         
         # Load into database 
         for _, row in ranking_df.iterrows():
-            insert_query = f"INSERT INTO valuation_engine_metrics_ranking ({', '.join(ranking_table_columns)}) VALUES (%s,%s,%s,%s,%s,%s,%s,%s)"
+            insert_query = f"INSERT INTO valuation_engine_metrics_ranking ({', '.join(ranking_table_columns)}) VALUES (%s,%s,%s,%s,%s,%s,%s,%s) ON DUPLICATE KEY UPDATE sic=VALUES(sic), industry=VALUES(industry), company_name=VALUES(company_name), metric_value=VALUES(metric_value), metric_ranking=VALUES(metric_ranking)"
             values = tuple(row)
             #print(insert_query)
             #print(values)
@@ -126,19 +126,19 @@ def run(company,year):
         
 
     # Refresh the ratio table for the list of industries
-    for _, row in industry_df.iterrows():
-        industry = row['industry']
+    # for _, row in industry_df.iterrows():
+    #     industry = row['industry']
         
-        if year ==["All"]:
-            delete_query = f"DELETE FROM valuation_engine_metrics_ranking WHERE industry=%s"
-            params =(industry,)
-        else:
-            placeholders = ', '.join(['%s'] * len(year))
-            delete_query = f"DELETE FROM valuation_engine_metrics_ranking WHERE industry=%s and report_year in ({placeholders})"
-            params =(industry,) + tuple(year)
-        #print(delete_query)
-        cursor.execute(delete_query, params= params)
-    print(f"Table valuation_engine_metrics_ranking is cleared for seleted industries.", flush=True)
+    #     if year ==["All"]:
+    #         delete_query = f"DELETE FROM valuation_engine_metrics_ranking WHERE industry=%s"
+    #         params =(industry,)
+    #     else:
+    #         placeholders = ', '.join(['%s'] * len(year))
+    #         delete_query = f"DELETE FROM valuation_engine_metrics_ranking WHERE industry=%s and report_year in ({placeholders})"
+    #         params =(industry,) + tuple(year)
+    #     #print(delete_query)
+    #     cursor.execute(delete_query, params= params)
+    # print(f"Table valuation_engine_metrics_ranking is cleared for seleted industries.", flush=True)
 
     # calculate ranking for the list of metrics
     for metric in metric_list:
@@ -151,6 +151,6 @@ def run(company,year):
 
 
 ### Enable for testing only ###
-# company_selected = [909832]
-# year_selected=["All"]
-# run(company_selected,year_selected)
+#company_selected = ['All']
+#year_selected=["All"]
+#run(company_selected,year_selected)
