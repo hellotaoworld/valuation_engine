@@ -33,7 +33,7 @@ try:
     print(f'=== Metrics Calculation Completed ===', flush=True)
 
     print(f'=== Start Calculating Ranking {gettime()} ===', flush=True)
-    calculate_ranking.run(company,year)
+    calculate_ranking.run(company,year,'All')
     print(f'=== Ranking Calculation Completed ===', flush=True)
     
     end_time =gettime()

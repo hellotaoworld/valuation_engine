@@ -9,12 +9,13 @@ def transform_symbol(column_list):
   return ["`" + column + "`" for column in column_list]
 
 
-def run(company,year):
+def run(company,year, metrics):
     # Establish connection and cursor
     connection = database_connection.establish_local_database()
     cursor = connection.cursor()
-
-    # Table variables
+    
+    #if metrics =='All':
+        # Table variables
     metric_list =  ['revenue_growth_rate',
                     'return_on_invested_capital_rate',
                     'eps_growth_rate', 
@@ -49,7 +50,9 @@ def run(company,year):
                     'pp_e_growth_rate', 
                     'goodwill_growth_rate',
                     'total_asset_growth_rate']
-
+    #else:
+    #    metric_list=[metrics]
+    
     # Read metrics
     #metrics_query =f"SELECT * FROM {metric_table_name}"
     #mapping_formula_df = pd.read_sql(metrics_query, connection)
@@ -63,7 +66,8 @@ def run(company,year):
         placeholders = ', '.join(['%s'] * len(company))
         industry_query =f"SELECT distinct s.industry FROM valuation_engine_mapping_company c left join valuation_engine_mapping_sic s on c.sic = s.sic where cik in ({placeholders})"
         params = tuple(company)
-    
+    #print(company)
+    #print(params)
     industry_df = pd.read_sql(industry_query, connection, params = params)
     #print(industry_df)
     
@@ -84,9 +88,9 @@ def run(company,year):
         direction= d_df["formula_direction"][0]
         
         if direction=='positive':
-            data_query =f"SELECT c.cik as cik, c.sic as sic, c.industry as industry, company_name, report_year,{metric_v} as metric_value  FROM valuation_engine_metrics m LEFT JOIN valuation_engine_mapping_company c on m.cik=c.cik WHERE  {metric_v} is not null order by report_year ASC, {metric_v} DESC"
+            data_query =f"SELECT c.cik as cik, c.sic as sic, c.industry as industry, c.company as company_name, report_year,{metric_v} as metric_value  FROM valuation_engine_metrics m LEFT JOIN valuation_engine_mapping_company c on m.cik=c.cik WHERE  {metric_v} is not null order by report_year ASC, industry ASC, {metric_v} DESC"
         else:
-            data_query =f"SELECT c.cik as cik, c.sic as sic, c.industry as industry, company_name, report_year,{metric_v} as metric_value  FROM valuation_engine_metrics m LEFT JOIN valuation_engine_mapping_company c on m.cik=c.cik WHERE  {metric_v} is not null order by report_year ASC, {metric_v} ASC"
+            data_query =f"SELECT c.cik as cik, c.sic as sic, c.industry as industry, c.company as company_name, report_year,{metric_v} as metric_value  FROM valuation_engine_metrics m LEFT JOIN valuation_engine_mapping_company c on m.cik=c.cik WHERE  {metric_v} is not null order by report_year ASC, industry ASC, {metric_v} ASC"
             
         q_df = pd.read_sql(data_query, connection)
         ranking_df = q_df[['cik', 'sic', 'industry', 'company_name','report_year', 'metric_value']]
@@ -152,6 +156,6 @@ def run(company,year):
 
 
 ### Enable for testing only ###
-#company_selected = ['All']
-#year_selected=["All"]
-#run(company_selected,year_selected)
+# company_selected = ['796343']
+# year_selected=[2023]
+# run(company_selected,year_selected,'All')

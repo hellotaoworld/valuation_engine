@@ -3,7 +3,6 @@ import os
 import pandas as pd
 from datetime import datetime
 import zipfile
-#import yfinance as yf
 import time 
 
 def run(company,year):

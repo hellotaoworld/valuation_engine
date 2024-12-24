@@ -24,12 +24,12 @@ def run(company,year):
     cursor = connection.cursor()
 
     # Read formula
-    formula_query =f"SELECT * FROM valuation_engine_mapping_formula"
+    formula_query =f"SELECT * FROM valuation_engine_mapping_formula where formula_category <>'Custom Ratio'"
     mapping_formula_df = pd.read_sql(formula_query, connection)
     formula_names = mapping_formula_df['formula_shortname'].tolist()
     
     # Read company list (add criteria to be picked)
-    if company==['all']:
+    if company==['All']:
         company_query =f"SELECT cik FROM valuation_engine_mapping_company"
         params= None 
     else:

@@ -37,7 +37,7 @@ def run(company,year):
     #df_sp500 = pd.read_sql(company_query, connection)
 
     # Get picked companies
-    if company==['all']:
+    if company==['All']:
         company_query =f"SELECT cik FROM valuation_engine_mapping_company"
         params= None 
     else:

@@ -1,6 +1,6 @@
 import extract_data, load_formula_mapping, load_other_mapping, load_data, calculate_metrics, calculate_ranking,update_cloud
-company=['all']
-year=['all']
+company=['All']
+year=['All']
 
 print('****** Valuation Engine is triggered *****')
 print('=== Refreshing Mapping ===')
@@ -21,7 +21,7 @@ calculate_metrics.run(company,year)
 print('=== Metrics Calculation Completed ===')
 
 print('=== Start Calculating Ranking ===')
-calculate_ranking.run(company,year)
+calculate_ranking.run(company,year,'All')
 print('=== Ranking Calculation Completed ===')
 
 # print('=== Update Cloud Database ===') 
