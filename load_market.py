@@ -1,9 +1,10 @@
 import yfinance as yf
 import pandas as pd
 import numpy as np
-import database_connection
+import database_connection, send_email
 from datetime import datetime, timedelta
 import warnings
+import pytz
 
 # Suppress all warnings
 warnings.filterwarnings("ignore")
@@ -22,11 +23,12 @@ def get_last_workday():
 def transform_symbol(column_list):
   return ["`" + column + "`" for column in column_list]
 
+
 def fetch_stock_prices(ticker, date):
     current_date = date
     stock =yf.Ticker(ticker)    
     info = stock.info
-    pe_ratio = info['forwardPE']
+    pe_ratio = info.get("trailingPE", "N/A")
     #dividend = info['dividendRate']
     #attempts = 0
     #while attempts < 3:
@@ -54,10 +56,10 @@ def calculate_ranking(year, metric_v):
     direction_query =f"SELECT formula_direction from valuation_engine_mapping_formula where formula_shortname='{metric_v}'"
     d_df = pd.read_sql(direction_query, connection)
     direction= d_df["formula_direction"][0]
-    print(direction)
+    #print(direction)
     industry_query =f"SELECT distinct industry FROM valuation_engine_mapping_sic"
     industry_df = pd.read_sql(industry_query, connection)
-    print(industry_df)    
+    #print(industry_df)    
     if direction=='positive':
         data_query =f"SELECT c.cik as cik, c.sic as sic, c.industry as industry, c.company as company_name, {year} as report_year,m.value as metric_value  FROM valuation_engine_inputs_market m LEFT JOIN valuation_engine_mapping_company c on m.cik=c.cik WHERE  m.mapping = '{metric_v}' order by m.value DESC"
     else:
@@ -150,5 +152,3 @@ def run():
     
     ####### Trigger Ranking Refresh for PE Ratio ##########
     calculate_ranking(current_year,'pe_ratio')
-
-run()
