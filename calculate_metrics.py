@@ -27,7 +27,7 @@ def run(company,year):
     formula_query =f"SELECT * FROM valuation_engine_mapping_formula where formula_category <>'Custom Ratio'"
     mapping_formula_df = pd.read_sql(formula_query, connection)
     formula_names = mapping_formula_df['formula_shortname'].tolist()
-    
+    #print(formula_names)
     # Read company list (add criteria to be picked)
     if company==['All']:
         company_query =f"SELECT cik FROM valuation_engine_mapping_company"
@@ -82,7 +82,7 @@ def run(company,year):
         ratio_df = ratio_df.replace([np.inf, -np.inf], np.nan)
         ratio_df=ratio_df.replace({np.nan: None})
         column_list = ratio_df.columns
-        #print(ratio_df)
+        #print(tuple(ratio_df[0]))
         #print(column_list)
         # Load into database 
         for _, row in ratio_df.iterrows():
@@ -111,5 +111,5 @@ def run(company,year):
 
 ### Enable for testing only ###
 # company_selected = [1546417]
-# year_selected=["All"]
+# year_selected=['2021']
 # run(company_selected,year_selected)
