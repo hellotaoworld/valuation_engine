@@ -1,4 +1,4 @@
-import extract_data, load_data, calculate_metrics, calculate_ranking, send_email
+import extract_data, load_data, calculate_metrics, calculate_ranking, send_email, load_formula_mapping
 from datetime import datetime
 import pytz
 import sys
@@ -19,7 +19,8 @@ year = sys.argv[2].split(',')
 print(year, flush=True)
 
 try:
-    
+    print(f'=== Update Formula Mapping {gettime()} ===', flush=True)
+    load_formula_mapping.run()
     print(f'=== Extract data {gettime()} ===', flush=True)
     extract_data.run(company,year)
     print(f'=== Data extracted ===', flush=True)

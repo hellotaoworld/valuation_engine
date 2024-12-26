@@ -67,7 +67,7 @@ def run(company,year):
 
         ratio_df = q_df[['cik', 'report_year', 'company_name']]
         #print(q_df['is.net_revenue'])
-        
+        #print(formula_names)
         # calculate
         for index, row in q_df.iterrows():
             for formula_name in formula_names:
@@ -110,6 +110,6 @@ def run(company,year):
     connection.close()
 
 ### Enable for testing only ###
-#company_selected = [910638]
-#year_selected=["All"]
-#run(company_selected,year_selected)
+# company_selected = [1546417]
+# year_selected=["All"]
+# run(company_selected,year_selected)
