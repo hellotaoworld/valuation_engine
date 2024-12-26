@@ -63,6 +63,19 @@ def run():
   connection_cloud.commit()  
   print("valuation_engine_metrics_ranking is loaded.",flush=True)
   
+  # Load Market table
+  market_query = f"SELECT * FROM web_application.valuation_engine_inputs_market;"
+  market_df = pd.read_sql(market_query, connection)
+  market_collist = transform_symbol(market_df.columns)
+  for _, row in market_df.iterrows():
+        insert_query = f"INSERT INTO valuation_engine_inputs_market ({', '.join(market_collist)}) VALUES (%s,%s,%s,%s,%s,%s,%s) ON DUPLICATE KEY UPDATE symbol=VALUES(symbol), tag=VALUES(tag), ddate=VALUES(ddate), value=VALUES(value), updated_timestamp=VALUES(timestamp)"
+        values = tuple(row)
+        cursor_cloud.execute(insert_query, values)
+  
+  connection.commit()
+  connection_cloud.commit()  
+  print("valuation_engine_inputs_market is loaded.",flush=True)
+  
 
   # Close the cursor and connection
   cursor_cloud.close()
