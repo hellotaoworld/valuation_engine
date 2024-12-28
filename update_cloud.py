@@ -3,7 +3,7 @@ import os
 import pandas as pd
 from datetime import datetime
 
-### Update Cloud database ###
+### Sync Cloud database ###
 
 def transform_symbol(column_list):
   return ["`" + column + "`" for column in column_list]
@@ -13,6 +13,7 @@ def run():
   # Establish connection and cursor
   connection = database_connection.establish_local_database()
   connection_cloud = database_connection.establish_cloud_database()
+  cursor = connection.cursor()
   cursor_cloud = connection_cloud.cursor()
   
   # Load formula table
@@ -75,6 +76,19 @@ def run():
   connection.commit()
   connection_cloud.commit()  
   print("valuation_engine_inputs_market is loaded.",flush=True)
+  
+  # Sync Notes table
+  note_query = f"SELECT * FROM web_application.valuation_engine_notes;"
+  note_df = pd.read_sql(note_query, connection_cloud)
+  note_collist = transform_symbol(note_df.columns)
+  for _, row in note_df.iterrows():
+        insert_query = f"INSERT INTO valuation_engine_notes ({', '.join(note_collist)}) VALUES (%s,%s,%s,%s,%s,%s,%s) ON DUPLICATE KEY UPDATE type=VALUES(type), notes=VALUES(notes), update_timestamp=VALUES(update_timestamp), update_by = VALUES(update_by), company = VALUES(company)"
+        values = tuple(row)
+        cursor.execute(insert_query, values)
+  
+  connection.commit()
+  connection_cloud.commit()  
+  print("valuation_engine_notes is sync from cloud.",flush=True)
   
 
   # Close the cursor and connection

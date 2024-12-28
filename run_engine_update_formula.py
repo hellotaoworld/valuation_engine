@@ -1,4 +1,4 @@
-import extract_data, load_data, calculate_metrics, calculate_ranking, send_email, load_formula_mapping,load_market
+import extract_data, load_data, calculate_metrics, calculate_ranking, send_email, load_formula_mapping
 from datetime import datetime
 import pytz
 import sys
@@ -21,13 +21,6 @@ print(year, flush=True)
 try:
     print(f'=== Update Formula Mapping {gettime()} ===', flush=True)
     load_formula_mapping.run()
-    print(f'=== Extract data {gettime()} ===', flush=True)
-    extract_data.run(company,year)
-    print(f'=== Data extracted ===', flush=True)
-
-    print(f'=== Start Loading Data {gettime()} ===', flush=True)
-    load_data.run(company,year)
-    print(f'=== Data Load Completed ===', flush=True)
 
     print(f'=== Start Calculating Metrics {gettime()} ===', flush=True)
     calculate_metrics.run(company,year)
@@ -36,11 +29,6 @@ try:
     print(f'=== Start Calculating Ranking {gettime()} ===', flush=True)
     calculate_ranking.run(company,year,'All')
     print(f'=== Ranking Calculation Completed ===', flush=True)
-    
-    print(f'=== Start Extracting PE Ratio {gettime()} ===', flush=True)
-    load_market.run()
-    print(f'=== PE Ratio Extract Completed ===', flush=True)
-    
     
     end_time =gettime()
     print(f"****** Valuation Engine Finished Successfully {end_time} *****", flush=True)
