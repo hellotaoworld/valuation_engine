@@ -95,7 +95,8 @@ def run(company,year, metrics):
         q_df = pd.read_sql(data_query, connection)
         ranking_df = q_df[['cik', 'sic', 'industry', 'company_name','report_year', 'metric_value']]
         ranking_df['metric_name']=metric_v
-        
+        ranking_df['metric_ranking'] = np.nan
+
         # calculate ranking per sector, per year
         for industry in industry_df['industry']:
             for year in year_df['year']:

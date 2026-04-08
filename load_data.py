@@ -54,12 +54,13 @@ def run(company,year):
         # Get sub file
         subfile = extractdir+"/"+qtr+"/sub.txt"
         try:
-            df_sub = pd.read_csv(subfile, sep='\t')
+            df_sub = pd.read_csv(subfile, sep='\t', encoding='utf-8', on_bad_lines='skip')
             #print(f"Loaded {subfile}")
             df_sub = df_sub[df_sub['form'].apply(lambda form: form=="10-K")]
             df_sp500sub = df_sub[df_sub['cik'].isin(df_sp500['cik'])]
         except Exception as e:
             print(f"Failed to read {subfile}: {e}", flush=True)
+            return
 
         # Get pre file
         prefile = extractdir+"/"+qtr+"/pre.txt"
@@ -71,6 +72,7 @@ def run(company,year):
             df_sp500pre = df_sp500pre[['adsh', 'report', 'stmt']].drop_duplicates()
         except Exception as e:
             print(f"Failed to read {prefile}: {e}", flush=True)
+            return
         
         # create adsh mapping
         adsh_sub = {row['adsh']: {'cik': row['cik'], 'fy': row['fy']} for _, row in df_sp500sub.iterrows()}
@@ -90,9 +92,16 @@ def run(company,year):
         try:
             df_num = pd.read_csv(numfile, sep='\t')
             df_num = df_num.reset_index(drop=True)
+            # Normalize num.txt schema — compatible with old (9-col) and new 2025+ (10-col with 'segments')
+            NUM_BASE_COLS = ['adsh', 'tag', 'version', 'ddate', 'qtrs', 'uom', 'coreg', 'value', 'footnote']
+            if 'segments' in df_num.columns:
+                df_num = df_num.loc[pd.isnull(df_num['segments']), :]
+            if 'coreg' not in df_num.columns:
+                df_num['coreg'] = None
+            df_num = df_num[[c for c in NUM_BASE_COLS if c in df_num.columns]]
             df_sp500num = df_num[df_num['adsh'].isin(df_sp500sub['adsh'])]
             df_sp500num = df_sp500num[df_sp500num['qtrs'].apply(lambda qtrs: qtrs==0 or qtrs==4)]
-            df_sp500num = df_sp500num.loc[pd.isnull(df_sp500num.coreg),:]
+            df_sp500num = df_sp500num.loc[pd.isnull(df_sp500num['coreg']),:]
             df_sp500num['mapping']=df_sp500num['tag'].apply(lambda tag: mapfields(tag, mapping_table))
             df_sp500num = df_sp500num[df_sp500num['mapping'].notna()]
             df_sp500num['cik'] = df_sp500num['adsh'].apply(lambda x: adsh_sub[x]['cik'] if x in adsh_sub else None)
@@ -113,8 +122,7 @@ def run(company,year):
             print(f"Data imported successfully from {qtr}.", flush=True)
         
         except Exception as e:
-            #print(f"Exception: Failed to read {numfile}: {e}")
-            print(f"no data extracted from {qtr} for selected companies.", flush=True)
+            print(f"no data extracted from {qtr} for selected companies. Error: {e}", flush=True)
             
     for qtr in extract_list:
         qtryear = qtr[:4]
