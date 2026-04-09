@@ -8,6 +8,20 @@ from datetime import datetime
 def transform_symbol(column_list):
   return ["`" + column + "`" for column in column_list]
 
+def to_row(row):
+  """Convert a pandas Series row to a tuple of native Python types."""
+  result = []
+  for v in row:
+    if isinstance(v, pd.Timestamp):
+      result.append(v.to_pydatetime())
+    elif hasattr(v, 'item'):  # numpy scalar (int64, float64, etc.)
+      result.append(None if pd.isna(v) else v.item())
+    elif isinstance(v, float) and pd.isna(v):
+      result.append(None)
+    else:
+      result.append(v)
+  return tuple(result)
+
 
 def run():
   # Establish connection and cursor
@@ -21,7 +35,7 @@ def run():
   formula_column_names = transform_symbol(mapping_formula_df.columns)
   for _, row in mapping_formula_df.iterrows():
         insert_query = f"INSERT INTO valuation_engine_mapping_formula ({', '.join(formula_column_names)}) VALUES (%s,%s,%s,%s,%s,%s,%s) ON DUPLICATE KEY UPDATE formula_name=VALUES(formula_name),formula_value=VALUES(formula_value),formula_pseudo_code=VALUES(formula_pseudo_code),formula_category=VALUES(formula_category),formula_type=VALUES(formula_type),formula_direction=VALUES(formula_direction)"
-        values = tuple(row)
+        values = to_row(row)
         cursor_cloud.execute(insert_query, values)
   connection.commit()
   connection_cloud.commit() 
@@ -33,7 +47,7 @@ def run():
   #print(mapping_company_df)
   for _, row in mapping_company_df.iterrows():
         insert_query = f"INSERT INTO valuation_engine_mapping_company ({', '.join(company_collist)}) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) ON DUPLICATE KEY UPDATE symbol=VALUES(symbol), company=VALUES(company), sic=VALUES(sic), industry=VALUES(industry), type=Values(type), fye=values(fye), qtr=values(qtr), exchange=values(exchange), type_fav=Values(type_fav)"
-        values = tuple(row)
+        values = to_row(row)
         cursor_cloud.execute(insert_query, values) 
   connection.commit()
   connection_cloud.commit() 
@@ -45,7 +59,7 @@ def run():
   url_collist = transform_symbol(url_df.columns)
   for _, row in url_df.iterrows():
         insert_query = f"INSERT INTO valuation_engine_urls ({', '.join(url_collist)}) VALUES (%s,%s,%s,%s,%s,%s) ON DUPLICATE KEY UPDATE adsh=VALUES(adsh), stmt=VALUES(stmt), url=VALUES(url)"
-        values = tuple(row)
+        values = to_row(row)
         cursor_cloud.execute(insert_query, values) 
   connection.commit()
   connection_cloud.commit() 
@@ -57,7 +71,7 @@ def run():
   ranking_collist = transform_symbol(ranking_df.columns)
   for _, row in ranking_df.iterrows():
         insert_query = f"INSERT INTO valuation_engine_metrics_ranking ({', '.join(ranking_collist)}) VALUES (%s,%s,%s,%s,%s,%s,%s,%s) ON DUPLICATE KEY UPDATE sic=VALUES(sic), industry=VALUES(industry), company_name=VALUES(company_name), metric_value=VALUES(metric_value), metric_ranking=VALUES(metric_ranking)"
-        values = tuple(row)
+        values = to_row(row)
         cursor_cloud.execute(insert_query, values)
   
   connection.commit()
@@ -70,7 +84,7 @@ def run():
   market_collist = transform_symbol(market_df.columns)
   for _, row in market_df.iterrows():
         insert_query = f"INSERT INTO valuation_engine_inputs_market ({', '.join(market_collist)}) VALUES (%s,%s,%s,%s,%s,%s,%s) ON DUPLICATE KEY UPDATE symbol=VALUES(symbol), tag=VALUES(tag), ddate=VALUES(ddate), value=VALUES(value), updated_timestamp=VALUES(timestamp)"
-        values = tuple(row)
+        values = to_row(row)
         cursor_cloud.execute(insert_query, values)
   
   connection.commit()
@@ -83,7 +97,7 @@ def run():
   q_ranking_collist = transform_symbol(q_ranking_df.columns)
   for _, row in q_ranking_df.iterrows():
         insert_query = f"INSERT INTO valuation_engine_metrics_ranking_quarterly ({', '.join(q_ranking_collist)}) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s) ON DUPLICATE KEY UPDATE sic=VALUES(sic), industry=VALUES(industry), company_name=VALUES(company_name), metric_value=VALUES(metric_value), metric_ranking=VALUES(metric_ranking)"
-        values = tuple(row)
+        values = to_row(row)
         cursor_cloud.execute(insert_query, values)
 
   connection.commit()
@@ -96,7 +110,7 @@ def run():
   note_collist = transform_symbol(note_df.columns)
   for _, row in note_df.iterrows():
         insert_query = f"INSERT INTO valuation_engine_notes ({', '.join(note_collist)}) VALUES (%s,%s,%s,%s,%s,%s,%s) ON DUPLICATE KEY UPDATE type=VALUES(type), notes=VALUES(notes), update_timestamp=VALUES(update_timestamp), update_by = VALUES(update_by), company = VALUES(company)"
-        values = tuple(row)
+        values = to_row(row)
         cursor.execute(insert_query, values)
   
   connection.commit()
