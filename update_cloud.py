@@ -77,6 +77,19 @@ def run():
   connection_cloud.commit()  
   print("valuation_engine_inputs_market is loaded.",flush=True)
   
+  # Load Quarterly Ranking table
+  q_ranking_query = f"SELECT * FROM web_application.valuation_engine_metrics_ranking_quarterly;"
+  q_ranking_df = pd.read_sql(q_ranking_query, connection)
+  q_ranking_collist = transform_symbol(q_ranking_df.columns)
+  for _, row in q_ranking_df.iterrows():
+        insert_query = f"INSERT INTO valuation_engine_metrics_ranking_quarterly ({', '.join(q_ranking_collist)}) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s) ON DUPLICATE KEY UPDATE sic=VALUES(sic), industry=VALUES(industry), company_name=VALUES(company_name), metric_value=VALUES(metric_value), metric_ranking=VALUES(metric_ranking)"
+        values = tuple(row)
+        cursor_cloud.execute(insert_query, values)
+
+  connection.commit()
+  connection_cloud.commit()
+  print("valuation_engine_metrics_ranking_quarterly is loaded.", flush=True)
+
   # Sync Notes table
   note_query = f"SELECT * FROM web_application.valuation_engine_notes;"
   note_df = pd.read_sql(note_query, connection_cloud)

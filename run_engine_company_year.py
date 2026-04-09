@@ -1,4 +1,4 @@
-import extract_data, load_data, calculate_metrics, calculate_ranking, send_email, load_formula_mapping,load_market
+import extract_data, load_data, calculate_metrics, calculate_metrics_quarterly, calculate_ranking, calculate_ranking_quarterly, send_email, load_formula_mapping, load_market
 from datetime import datetime
 import pytz
 import sys
@@ -33,9 +33,17 @@ try:
     calculate_metrics.run(company,year)
     print(f'=== Metrics Calculation Completed ===', flush=True)
 
+    print(f'=== Start Calculating Quarterly Metrics {gettime()} ===', flush=True)
+    calculate_metrics_quarterly.run(company,year)
+    print(f'=== Quarterly Metrics Calculation Completed ===', flush=True)
+
     print(f'=== Start Calculating Ranking {gettime()} ===', flush=True)
     calculate_ranking.run(company,year,'All')
     print(f'=== Ranking Calculation Completed ===', flush=True)
+
+    print(f'=== Start Calculating Quarterly Ranking {gettime()} ===', flush=True)
+    calculate_ranking_quarterly.run(company,year,'All')
+    print(f'=== Quarterly Ranking Calculation Completed ===', flush=True)
     
     print(f'=== Start Extracting PE Ratio {gettime()} ===', flush=True)
     load_market.run()

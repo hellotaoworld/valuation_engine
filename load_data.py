@@ -56,7 +56,7 @@ def run(company,year):
         try:
             df_sub = pd.read_csv(subfile, sep='\t', encoding='utf-8', on_bad_lines='skip')
             #print(f"Loaded {subfile}")
-            df_sub = df_sub[df_sub['form'].apply(lambda form: form=="10-K")]
+            df_sub = df_sub[df_sub['form'].apply(lambda form: form in ["10-K", "10-Q"])]
             df_sp500sub = df_sub[df_sub['cik'].isin(df_sp500['cik'])]
         except Exception as e:
             print(f"Failed to read {subfile}: {e}", flush=True)
@@ -75,7 +75,7 @@ def run(company,year):
             return
         
         # create adsh mapping
-        adsh_sub = {row['adsh']: {'cik': row['cik'], 'fy': row['fy']} for _, row in df_sp500sub.iterrows()}
+        adsh_sub = {row['adsh']: {'cik': row['cik'], 'fy': row['fy'], 'form': row['form']} for _, row in df_sp500sub.iterrows()}
         
         # Load url table
         df_sp500pre['cik'] = df_sp500pre['adsh'].apply(lambda x: adsh_sub[x]['cik'] if x in adsh_sub else None)
@@ -100,7 +100,10 @@ def run(company,year):
                 df_num['coreg'] = None
             df_num = df_num[[c for c in NUM_BASE_COLS if c in df_num.columns]]
             df_sp500num = df_num[df_num['adsh'].isin(df_sp500sub['adsh'])]
-            df_sp500num = df_sp500num[df_sp500num['qtrs'].apply(lambda qtrs: qtrs==0 or qtrs==4)]
+            df_sp500num['form_type'] = df_sp500num['adsh'].apply(lambda x: adsh_sub[x]['form'] if x in adsh_sub else None)
+            mask_10k = (df_sp500num['form_type'] == '10-K') & df_sp500num['qtrs'].isin([0, 4])
+            mask_10q = (df_sp500num['form_type'] == '10-Q') & df_sp500num['qtrs'].isin([0, 1])
+            df_sp500num = df_sp500num[mask_10k | mask_10q]
             df_sp500num = df_sp500num.loc[pd.isnull(df_sp500num['coreg']),:]
             df_sp500num['mapping']=df_sp500num['tag'].apply(lambda tag: mapfields(tag, mapping_table))
             df_sp500num = df_sp500num[df_sp500num['mapping'].notna()]
@@ -109,11 +112,11 @@ def run(company,year):
             df_sp500num['updated_file']=qtr
             df_sp500num = df_sp500num.replace({np.nan: None})
             #print(df_sp500num)
-        
+
             # Load dataset df_sp500num
             column_list = transform_symbol(df_sp500num.columns)
             for _, row in df_sp500num.iterrows():
-                insert_query = f"INSERT INTO valuation_engine_inputs ({', '.join(column_list)}) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) ON DUPLICATE KEY UPDATE adsh=VALUES(adsh), coreg=VALUES(coreg), version=VALUES(version), qtrs=VALUES(qtrs), uom=VALUES(uom), value=VALUES(value), footnote=VALUES(footnote), mapping=VALUES(mapping), updated_file=VALUES(updated_file), fy=VALUES(fy)"
+                insert_query = f"INSERT INTO valuation_engine_inputs ({', '.join(column_list)}) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) ON DUPLICATE KEY UPDATE adsh=VALUES(adsh), coreg=VALUES(coreg), version=VALUES(version), qtrs=VALUES(qtrs), uom=VALUES(uom), value=VALUES(value), footnote=VALUES(footnote), mapping=VALUES(mapping), updated_file=VALUES(updated_file), fy=VALUES(fy), form_type=VALUES(form_type)"
                 values = tuple(row)
                 cursor.execute(insert_query, values)
             
